@@ -9,5 +9,9 @@ import com.vennhuu.PersonalFinance.Entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByEmail(String username);
+
+    boolean existsByEmail( String email ) ;
+
+    boolean existsByPhoneNumber( String phoneNumber ) ;
     
 }

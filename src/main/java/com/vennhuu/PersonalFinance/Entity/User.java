@@ -2,6 +2,9 @@ package com.vennhuu.PersonalFinance.Entity;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.vennhuu.PersonalFinance.Enum.UserStatus;
 
 import jakarta.persistence.Column;
@@ -15,6 +18,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,6 +43,11 @@ public class User extends BaseEntity {
     @Column(unique = true, length = 150)
     private String email;
 
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Pattern(
+        regexp = "^0\\d{9}$",
+        message = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0"
+    )
     @Column(unique = true, length = 20)
     private String phoneNumber;
 
@@ -49,6 +59,7 @@ public class User extends BaseEntity {
     private Instant otpExpiredAt;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 }

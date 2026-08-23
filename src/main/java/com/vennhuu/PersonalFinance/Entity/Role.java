@@ -1,5 +1,8 @@
 package com.vennhuu.PersonalFinance.Entity;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.vennhuu.PersonalFinance.Enum.RoleName;
 
 import jakarta.persistence.Column;
@@ -24,6 +27,7 @@ public class Role {
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(nullable = false, unique = true)
     private RoleName name;
 

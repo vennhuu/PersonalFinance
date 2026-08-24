@@ -43,7 +43,6 @@ public class User extends BaseEntity {
     @Column(unique = true, length = 150)
     private String email;
 
-    @NotBlank(message = "Số điện thoại không được để trống")
     @Pattern(
         regexp = "^0\\d{9}$",
         message = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0"

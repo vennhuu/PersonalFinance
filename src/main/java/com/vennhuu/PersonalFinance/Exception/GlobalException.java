@@ -1,9 +1,14 @@
 package com.vennhuu.PersonalFinance.Exception;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -50,36 +55,31 @@ public class GlobalException {
     @ExceptionHandler(value = {
         BadCredentialsException.class,
         UsernameNotFoundException.class
-    })
-    public ResponseEntity<RestResponse<Object>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+    })  
+    public ResponseEntity<RestResponse<Object>> handleUsernameNotFoundException(Exception ex) {
         RestResponse<Object> res = new RestResponse<>();
         res.setStatus(HttpStatus.UNAUTHORIZED.value());
         res.setError("Unauthorized");
         res.setMessage(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(res);
     }
 
     // validate
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<RestResponse<Object>> handleValidationException(
-            MethodArgumentNotValidException ex) {
+    public ResponseEntity<RestResponse<Object>> handleValidationError(MethodArgumentNotValidException ex) {
+        BindingResult result = ex.getBindingResult();
+        List<FieldError> fieldErrors = result.getFieldErrors();
+
+        List<String> errors = fieldErrors.stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.toList());
 
         RestResponse<Object> res = new RestResponse<>();
-
         res.setStatus(HttpStatus.BAD_REQUEST.value());
-        res.setError("Bad Request");
+        res.setError(ex.getBody().getDetail());
+        res.setMessage(errors.size() == 1 ? errors.get(0) : errors);
 
-        String message = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> error.getDefaultMessage())
-                .findFirst()
-                .orElse("Dữ liệu không hợp lệ");
-
-        res.setMessage(message);
-
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(res);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
+
 }

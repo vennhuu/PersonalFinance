@@ -3,10 +3,14 @@ package com.vennhuu.PersonalFinance.Service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.vennhuu.PersonalFinance.Entity.Request.User.UpdateUserReq;
 import com.vennhuu.PersonalFinance.Entity.Response.User.UserResponse;
 import com.vennhuu.PersonalFinance.Entity.User;
 import com.vennhuu.PersonalFinance.Entity.Wallet;
+import com.vennhuu.PersonalFinance.Exception.ExistsEmailException;
+import com.vennhuu.PersonalFinance.Exception.ExistsPhoneNumberException;
 import com.vennhuu.PersonalFinance.Exception.IdInvalidException;
 import com.vennhuu.PersonalFinance.Repository.UserRepository;
 
@@ -34,7 +38,9 @@ public class UserService {
         userResponse.setEmail(user.getEmail());
         userResponse.setPhoneNumber(user.getPhoneNumber());
         userResponse.setStatus(user.getStatus());
-        userResponse.setRole(user.getRole());
+        if (user.getRole() != null) {
+            userResponse.setRole(user.getRole().getName());
+        }
 
         return userResponse;
     }
@@ -60,10 +66,50 @@ public class UserService {
                 .toList();
     }
 
-    public UserResponse findById(Long id) {
-        User user = this.userRepository.findById(id)
+    public User fetchUserById(Long id) {
+        return this.userRepository.findById(id)
                 .orElseThrow(() -> new IdInvalidException("Id người dùng không tồn tại"));
+    }
+
+    public UserResponse findById(Long id) {
+        User user = this.fetchUserById(id);
         return this.convertToUserResponse(user);
+    }
+
+    public User findByEmail( String email ) {
+        return this.userRepository.findByEmail(email) ;
+    }
+
+    @Transactional
+    public UserResponse updateUser(Long id, UpdateUserReq updateUserReq) {
+        User currentUser = this.fetchUserById(id);
+
+        if (updateUserReq.getFullName() != null && !updateUserReq.getFullName().isBlank()) {
+            currentUser.setFullName(updateUserReq.getFullName());
+        }
+
+        if (updateUserReq.getEmail() != null && !updateUserReq.getEmail().isBlank()) {
+            String newEmail = updateUserReq.getEmail();
+            if (!newEmail.equals(currentUser.getEmail())) {
+                if (this.userRepository.existsByEmail(newEmail)) {
+                    throw new ExistsEmailException("Email đã tồn tại");
+                }
+                currentUser.setEmail(newEmail);
+            }
+        }
+
+        if (updateUserReq.getPhoneNumber() != null && !updateUserReq.getPhoneNumber().isBlank()) {
+            String newPhone = updateUserReq.getPhoneNumber();
+            if (!newPhone.equals(currentUser.getPhoneNumber())) {
+                if (this.userRepository.existsByPhoneNumber(newPhone)) {
+                    throw new ExistsPhoneNumberException("Số điện thoại đã tồn tại");
+                }
+                currentUser.setPhoneNumber(newPhone);
+            }
+        }
+
+        User updatedUser = this.userRepository.save(currentUser);
+        return this.convertToUserResponse(updatedUser);
     }
 }
 

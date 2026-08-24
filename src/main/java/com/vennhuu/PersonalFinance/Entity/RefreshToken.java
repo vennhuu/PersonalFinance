@@ -30,7 +30,7 @@ public class RefreshToken extends BaseEntity {
 
     private String device;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String tokenHash;
 
     @Column(nullable = false)

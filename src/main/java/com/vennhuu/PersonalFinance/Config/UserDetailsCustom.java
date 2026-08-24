@@ -2,11 +2,11 @@ package com.vennhuu.PersonalFinance.Config;
 
 import java.util.Collections;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import com.vennhuu.PersonalFinance.Repository.UserRepository;
@@ -21,13 +21,16 @@ public class UserDetailsCustom implements UserDetailsService{
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws BadCredentialsException {
         
         com.vennhuu.PersonalFinance.Entity.User user = this.userRepository.findByEmail(username) ;
         if ( user == null ) {
-            throw new UsernameNotFoundException("Email/Password không đúng") ;
+            throw new BadCredentialsException("Email/Password không đúng") ;
         }
-        return new User(user.getEmail(), user.getPassword(), Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        String roleName = (user.getRole() != null && user.getRole().getName() != null)
+                ? user.getRole().getName().name()
+                : "ROLE_USER";
+        return new User(user.getEmail(), user.getPassword(), Collections.singletonList(new SimpleGrantedAuthority(roleName)));
     }
 
     

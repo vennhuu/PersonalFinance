@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+
+<h2>Xin chào <span th:text="${name}"></span></h2>
+
+<p>Bạn vừa được giao một công việc mới.</p>
+
+<table border="1" cellpadding="10">
+
+    <tr>
+        <td><b>Project</b></td>
+        <td th:text="${projectName}"></td>
+    </tr>
+
+    <tr>
+        <td><b>Task</b></td>
+        <td th:text="${taskTitle}"></td>
+    </tr>
+
+</table>
+
+<br>
+
+<p>Vui lòng đăng nhập vào hệ thống để xem chi tiết.</p>
+
+<p>Task Management System</p>
+
+</body>
+
+</html>

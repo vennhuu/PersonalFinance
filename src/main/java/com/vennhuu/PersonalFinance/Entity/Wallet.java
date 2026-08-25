@@ -2,6 +2,9 @@ package com.vennhuu.PersonalFinance.Entity;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
+
 import com.vennhuu.PersonalFinance.Enum.WalletType;
 
 import jakarta.persistence.Column;
@@ -36,6 +39,7 @@ public class Wallet extends BaseEntity {
     private String name; // tên user tự đặt, vd "Vietcombank", "Tiền mặt"
 
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)
     private WalletType type;
 

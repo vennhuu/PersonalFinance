@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum TransactionType {
     INCOME("Tiền vào"), 
-    OUTCOME("Tiền ra") ;
+    EXPENSE("Tiền ra") ;
     
     private String des ;
 

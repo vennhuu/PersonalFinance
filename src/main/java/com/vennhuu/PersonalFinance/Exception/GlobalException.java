@@ -93,4 +93,21 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<RestResponse<Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatus(HttpStatus.NOT_FOUND.value());
+        res.setError(HttpStatus.NOT_FOUND.getReasonPhrase());
+        res.setMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(res);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<RestResponse<Object>> handleForbiddenException(ForbiddenException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatus(HttpStatus.FORBIDDEN.value());
+        res.setError(HttpStatus.FORBIDDEN.getReasonPhrase());
+        res.setMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(res);
+    }
 }

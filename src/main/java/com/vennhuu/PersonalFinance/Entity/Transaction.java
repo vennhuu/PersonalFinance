@@ -3,6 +3,9 @@ package com.vennhuu.PersonalFinance.Entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
+
 import com.vennhuu.PersonalFinance.Enum.TransactionType;
 
 import jakarta.persistence.Column;
@@ -42,6 +45,7 @@ public class Transaction extends BaseEntity {
     private Category category;
 
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)
     private TransactionType type; // INCOME | EXPENSE
 

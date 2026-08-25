@@ -1,5 +1,8 @@
 package com.vennhuu.PersonalFinance.Entity;
 
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.type.PostgreSQLEnumJdbcType;
+
 import com.vennhuu.PersonalFinance.Enum.TransactionType;
 
 import jakarta.persistence.Column;
@@ -34,6 +37,7 @@ public class Category extends BaseEntity {
     private String name; // vd: Ăn uống, Lương, Du lịch
 
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
     @Column(nullable = false)
     private TransactionType type; // INCOME | EXPENSE
 }

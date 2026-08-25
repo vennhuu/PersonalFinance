@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vennhuu.PersonalFinance.Entity.Request.ReqChangePasswordDTO;
-import com.vennhuu.PersonalFinance.Entity.Request.ReqForgotPasswordDTO;
-import com.vennhuu.PersonalFinance.Entity.Request.ReqLoginDTO;
-import com.vennhuu.PersonalFinance.Entity.Request.ReqResetPasswordDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqChangePasswordDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqForgotPasswordDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqLoginDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqResetPasswordDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.Auth.ResLoginDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.User.UserResponse;
 import com.vennhuu.PersonalFinance.Entity.User;
@@ -106,22 +106,22 @@ public class AuthController {
                 .build();
     }
 
-    @PostMapping("/forgot-password")
-    @APIMessage("Gửi mã OTP quên mật khẩu về Email")
+    @PostMapping("/send-otp")
+    @APIMessage("Send OTP to email")
     public ResponseEntity<String> sendForgotPasswordOtp(@Valid @RequestBody ReqForgotPasswordDTO req) {
         this.authService.sendForgotPasswordOtp(req);
         return ResponseEntity.ok("Mã OTP đã được gửi về email của bạn");
     }
 
     @PostMapping("/reset-password")
-    @APIMessage("Đặt lại mật khẩu bằng OTP")
+    @APIMessage("Reset password")
     public ResponseEntity<String> resetPassword(@Valid @RequestBody ReqResetPasswordDTO req) {
         this.authService.resetPassword(req);
         return ResponseEntity.ok("Đổi mật khẩu thành công");
     }
 
     @PostMapping("/change-password")
-    @APIMessage("Đổi mật khẩu tài khoản")
+    @APIMessage("Change password")
     public ResponseEntity<String> changePassword(@Valid @RequestBody ReqChangePasswordDTO req) {
         this.authService.changePassword(req);
         return ResponseEntity.ok("Đổi mật khẩu thành công");

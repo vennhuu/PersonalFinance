@@ -1,4 +1,4 @@
-package com.vennhuu.PersonalFinance.Entity.Request;
+package com.vennhuu.PersonalFinance.Entity.Request.Auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

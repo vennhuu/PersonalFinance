@@ -15,16 +15,27 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.vennhuu.PersonalFinance.Entity.Response.RestResponse;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestControllerAdvice
 public class GlobalException {
 
     // all exc
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestResponse<Object>> handleAllException(Exception ex) {
+
+        log.error("Unhandled exception occurred", ex); // in full stack trace ra terminal
+
+        Throwable root = ex;
+        while (root.getCause() != null) {
+            root = root.getCause();
+        }
+
         RestResponse<Object> res = new RestResponse<>();
         res.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         res.setError("Internal Server Error");
-        res.setMessage(ex.getMessage());
+        res.setMessage(root.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
     }
 

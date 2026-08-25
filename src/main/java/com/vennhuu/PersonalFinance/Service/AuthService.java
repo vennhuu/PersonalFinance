@@ -14,10 +14,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import com.vennhuu.PersonalFinance.Entity.RefreshToken;
-import com.vennhuu.PersonalFinance.Entity.Request.ReqChangePasswordDTO;
-import com.vennhuu.PersonalFinance.Entity.Request.ReqForgotPasswordDTO;
-import com.vennhuu.PersonalFinance.Entity.Request.ReqLoginDTO;
-import com.vennhuu.PersonalFinance.Entity.Request.ReqResetPasswordDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqChangePasswordDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqForgotPasswordDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqLoginDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqResetPasswordDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.Auth.ResLoginDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.User.UserResponse;
 import com.vennhuu.PersonalFinance.Entity.Role;
@@ -202,7 +202,7 @@ public class AuthService {
     public void sendForgotPasswordOtp(ReqForgotPasswordDTO req) {
         User user = this.userRepository.findByEmail(req.getEmail());
         if (user == null) {
-            throw new IdInvalidException("Email không tồn tại trong hệ thống");
+            throw new ExistsEmailException("Email không tồn tại trong hệ thống");
         }
 
         String otpCode = generate6DigitNumber();
@@ -217,15 +217,15 @@ public class AuthService {
     public void resetPassword(ReqResetPasswordDTO req) {
         User user = this.userRepository.findByEmail(req.getEmail());
         if (user == null) {
-            throw new IdInvalidException("Email không tồn tại trong hệ thống");
+            throw new ExistsEmailException("Email không tồn tại trong hệ thống");
         }
 
         if (user.getOtpCode() == null || !user.getOtpCode().equals(req.getOtpCode())) {
-            throw new IdInvalidException("Mã OTP không chính xác");
+            throw new ExistsEmailException("Mã OTP không chính xác");
         }
 
         if (user.getOtpExpiredAt() == null || user.getOtpExpiredAt().isBefore(Instant.now())) {
-            throw new IdInvalidException("Mã OTP đã hết hạn");
+            throw new ExistsEmailException("Mã OTP đã hết hạn");
         }
 
         user.setPassword(this.passwordEncoder.encode(req.getNewPassword()));
@@ -241,7 +241,7 @@ public class AuthService {
 
         User user = this.userRepository.findByEmail(email);
         if (user == null) {
-            throw new IdInvalidException("Tài khoản không tồn tại");
+            throw new ExistsEmailException("Tài khoản không tồn tại");
         }
 
         if (!this.passwordEncoder.matches(req.getOldPassword(), user.getPassword())) {

@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vennhuu.PersonalFinance.Entity.Category;
 import com.vennhuu.PersonalFinance.Entity.Request.Category.CategoryReq;
 import com.vennhuu.PersonalFinance.Entity.Response.Category.ResCategory;
 import com.vennhuu.PersonalFinance.Service.CategoryService;
+import com.vennhuu.PersonalFinance.Utils.Annotation.APIMessage;
 
 import jakarta.validation.Valid;
 
@@ -31,29 +31,34 @@ public class CategoryController {
     }
 
     @PostMapping("")
+    @APIMessage("Add new Category")
     public ResponseEntity<ResCategory> addNewCategory(@Valid @RequestBody CategoryReq req) {
         
         return ResponseEntity.status(HttpStatus.CREATED).body(this.categoryService.addNewCategory(req));
     }
 
     @GetMapping("")
+    @APIMessage("Get all Category by user")
     public ResponseEntity<List<ResCategory>> getAllCategory() {
         return ResponseEntity.ok(this.categoryService.getAllCategoryByUserId());
     }
     
     @GetMapping("/{categoryId}")
+    @APIMessage("Get detail category by user")
     public ResponseEntity<ResCategory> getDetailCategory(@PathVariable long categoryId) {
         return ResponseEntity.ok(this.categoryService.getDetailCategory(categoryId));
     }
     
     @DeleteMapping("{categoryId}")
-    public ResponseEntity<Category> deleteCategory(@PathVariable Long categoryId) {
+    @APIMessage("Delete category")
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long categoryId) {
         this.categoryService.deleteCategory(categoryId);
         return ResponseEntity.noContent().build() ;
     }
 
     @PutMapping("/{categoryId}")
-    public ResponseEntity<ResCategory> putMethodName(@PathVariable Long categoryId, @Valid @RequestBody CategoryReq req) {
+    @APIMessage("Update Category")
+    public ResponseEntity<ResCategory> updateCategory(@PathVariable Long categoryId, @Valid @RequestBody CategoryReq req) {
         //TODO: process PUT request
         
         return ResponseEntity.ok(this.categoryService.updateCategory(categoryId, req));

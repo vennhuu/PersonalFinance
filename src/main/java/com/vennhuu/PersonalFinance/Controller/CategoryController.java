@@ -1,7 +1,6 @@
 package com.vennhuu.PersonalFinance.Controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,10 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vennhuu.PersonalFinance.Entity.Request.Category.CategoryReq;
 import com.vennhuu.PersonalFinance.Entity.Response.Category.ResCategory;
+import com.vennhuu.PersonalFinance.Entity.Response.ResultPaginationDTO;
 import com.vennhuu.PersonalFinance.Service.CategoryService;
 import com.vennhuu.PersonalFinance.Utils.Annotation.APIMessage;
 
@@ -39,8 +40,12 @@ public class CategoryController {
 
     @GetMapping("")
     @APIMessage("Get all Category by user")
-    public ResponseEntity<List<ResCategory>> getAllCategory() {
-        return ResponseEntity.ok(this.categoryService.getAllCategoryByUserId());
+    public ResponseEntity<ResultPaginationDTO> getAllCategory(
+        @RequestParam String currentPage, 
+        @RequestParam String pageSize,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(this.categoryService.getAllCategoryByUserId(pageable));
     }
     
     @GetMapping("/{categoryId}")

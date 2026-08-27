@@ -3,11 +3,14 @@ package com.vennhuu.PersonalFinance.Service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import com.vennhuu.PersonalFinance.Entity.Category;
 import com.vennhuu.PersonalFinance.Entity.Request.Transaction.TransactionReq;
+import com.vennhuu.PersonalFinance.Entity.Response.ResultPaginationDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.Transaction.ResTransaction;
 import com.vennhuu.PersonalFinance.Entity.Transaction;
 import com.vennhuu.PersonalFinance.Entity.User;
@@ -138,10 +141,25 @@ public class TransactionService {
         return convertToResTransaction(saved);
     }
 
-    public List<ResTransaction> getAllTransactionByUser() {
+    public ResultPaginationDTO getAllTransactionByUser(Pageable pageable) {
+        
         User user = getCurrentUser();
-        return transactionRepository.getAllTransactionByUserId(user.getId())
-                .stream().map(this::convertToResTransaction).toList();
+        Page<Transaction> pageTransaction = this.transactionRepository.getAllTransactionByUserId(user.getId(), pageable) ;
+
+        ResultPaginationDTO res = new ResultPaginationDTO() ;
+
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setCurrentPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotalElements(pageTransaction.getTotalElements());
+        meta.setTotalPages(pageTransaction.getTotalPages());
+
+        List<ResTransaction> listTransaction = pageTransaction.getContent().stream().map(this::convertToResTransaction).toList();
+
+        res.setMeta(meta);
+        res.setResult(listTransaction);
+
+        return res ;
     }
 
     public ResTransaction getDetailTransaction(Long id) {

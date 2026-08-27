@@ -2,12 +2,15 @@ package com.vennhuu.PersonalFinance.Service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import com.vennhuu.PersonalFinance.Entity.Category;
 import com.vennhuu.PersonalFinance.Entity.Request.Category.CategoryReq;
 import com.vennhuu.PersonalFinance.Entity.Response.Category.ResCategory;
+import com.vennhuu.PersonalFinance.Entity.Response.ResultPaginationDTO;
 import com.vennhuu.PersonalFinance.Entity.User;
 import com.vennhuu.PersonalFinance.Exception.ResourceNotFoundException;
 import com.vennhuu.PersonalFinance.Repository.CategoryRepository;
@@ -52,10 +55,25 @@ public class CategoryService {
         return convertToResCategory(saved);
     }
 
-    public List<ResCategory> getAllCategoryByUserId() {
+    public ResultPaginationDTO getAllCategoryByUserId(Pageable pageable) {
         User user = this.getCurrentUser();
-        return this.categoryRepository.getAllCategoriesByUserId(user.getId())
-                .stream().map(this::convertToResCategory).toList();
+        
+        Page<Category> pageCategory = this.categoryRepository.getAllCategoriesByUserId(user.getId(), pageable) ;
+
+        ResultPaginationDTO res = new ResultPaginationDTO() ;
+
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setCurrentPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotalElements(pageCategory.getTotalElements());
+        meta.setTotalPages(pageCategory.getTotalPages());
+
+        List<ResCategory> listCategory = pageCategory.getContent().stream().map(this::convertToResCategory).toList();
+
+        res.setMeta(meta);
+        res.setResult(listCategory);
+
+        return res ;
     }
 
     public ResCategory getDetailCategory(Long categoryId) {

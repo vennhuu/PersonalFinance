@@ -2,10 +2,13 @@ package com.vennhuu.PersonalFinance.Service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
 import com.vennhuu.PersonalFinance.Entity.Request.Wallet.WalletReq;
+import com.vennhuu.PersonalFinance.Entity.Response.ResultPaginationDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.Wallet.ResWallet;
 import com.vennhuu.PersonalFinance.Entity.User;
 import com.vennhuu.PersonalFinance.Entity.Wallet;
@@ -53,10 +56,26 @@ public class WalletService {
         return convertToResWallet(saved);
     }
 
-    public List<ResWallet> getAllWalletByUserId() {
+    public ResultPaginationDTO getAllWalletByUserId(Pageable pageable) {
+
         User user = this.getCurrentUser();
-        return this.walletRepository.getAllWalletByUserId(user.getId())
-                .stream().map(this::convertToResWallet).toList();
+
+        Page<Wallet> pageWallet = this.walletRepository.getAllWalletByUserId(user.getId(), pageable) ;
+
+        ResultPaginationDTO res = new ResultPaginationDTO() ;
+
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta();
+        meta.setCurrentPage(pageable.getPageNumber() + 1);
+        meta.setPageSize(pageable.getPageSize());
+        meta.setTotalElements(pageWallet.getTotalElements());
+        meta.setTotalPages(pageWallet.getTotalPages());
+
+        List<ResWallet> listWallet = pageWallet.getContent().stream().map(this::convertToResWallet).toList();
+
+        res.setMeta(meta);
+        res.setResult(listWallet);
+
+        return res ;
     }
 
 

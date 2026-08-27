@@ -1,7 +1,6 @@
 package com.vennhuu.PersonalFinance.Controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,9 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vennhuu.PersonalFinance.Entity.Request.Wallet.WalletReq;
+import com.vennhuu.PersonalFinance.Entity.Response.ResultPaginationDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.Wallet.ResWallet;
 import com.vennhuu.PersonalFinance.Service.WalletService;
 import com.vennhuu.PersonalFinance.Utils.Annotation.APIMessage;
@@ -40,8 +41,12 @@ public class WalletController {
 
     @GetMapping("")
     @APIMessage("Get all wallet by user")
-    public ResponseEntity<List<ResWallet>> getAllWalletByUserId() {
-        return ResponseEntity.ok(this.walletService.getAllWalletByUserId());
+    public ResponseEntity<ResultPaginationDTO> getAllWalletByUserId(
+            @RequestParam String currentPage, 
+            @RequestParam String pageSize,
+            Pageable pageable
+        ) {
+        return ResponseEntity.ok(this.walletService.getAllWalletByUserId(pageable));
     }
 
     @GetMapping("/{walletId}")

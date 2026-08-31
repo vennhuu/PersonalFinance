@@ -2,6 +2,7 @@ package com.vennhuu.PersonalFinance.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -30,4 +31,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             AND t.type = 'EXPENSE'
     """)
     BigDecimal sumExpenseByCategoryAndDateRange(Long userId, Long categoryId, LocalDate from, LocalDate to);
+
+    List<Transaction> findByUser_IdAndTransactionDateBetween(Long userId, LocalDate from, LocalDate to);
 }

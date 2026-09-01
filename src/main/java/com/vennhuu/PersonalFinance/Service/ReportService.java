@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +45,7 @@ public class ReportService {
     }
 
     //Tổng quan thu/chi
+    @Cacheable(value = "reportSummary", key = "#userId + '_' + #from + '_' + #to")
     public ResSummary getSummary(LocalDate from, LocalDate to) {
         List<Transaction> transactions = getTransactionsInRange(from, to);
 
@@ -54,6 +56,7 @@ public class ReportService {
     }
 
     //Thống kê theo category
+    @Cacheable(value = "reportByCategory", key = "#userId + '_' + #from + '_' + #to + '_' + #type")
     public List<ResCategoryStat> getStatsByCategory(LocalDate from, LocalDate to, TransactionType type) {
         List<Transaction> transactions = getTransactionsInRange(from, to);
 
@@ -70,6 +73,7 @@ public class ReportService {
     }
 
     // Xu hướng theo ngày
+    @Cacheable(value = "reportTrend", key = "#userId + '_' + #from + '_' + #to")
     public List<ResTrendPoint> getTrend(LocalDate from, LocalDate to) {
         List<Transaction> transactions = getTransactionsInRange(from, to);
 

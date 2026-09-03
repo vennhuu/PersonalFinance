@@ -24,7 +24,7 @@ services:
     container_name: personal-finance-redis
     restart: unless-stopped
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -32,6 +32,22 @@ services:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
+      retries: 5
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: personal-finance-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "${RABBITMQ_PORT}:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   backend:
@@ -49,8 +65,8 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
 
       # JPA
-      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-update}
-      SHOW_SQL: ${SHOW_SQL:-false}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO}
+      SHOW_SQL: ${SHOW_SQL}
 
       # JWT
       JWT_SECRET: ${JWT_SECRET}
@@ -64,12 +80,19 @@ services:
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
 
       # Redis
-      REDIS_HOST: ${DOCKER_REDIS_HOST:-redis}
-      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_HOST: ${DOCKER_REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+      RABBITMQ_HOST: ${DOCKER_RABBITMQ_HOST}
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: ${RABBITMQ_USER}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
 volumes:

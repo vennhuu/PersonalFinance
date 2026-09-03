@@ -19,6 +19,7 @@ import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqForgotPasswordDTO;
 import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqLoginDTO;
 import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqResetPasswordDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.Auth.ResLoginDTO;
+import com.vennhuu.PersonalFinance.Entity.Response.RabbitMQ.OtpEmailMessage;
 import com.vennhuu.PersonalFinance.Entity.Response.User.UserResponse;
 import com.vennhuu.PersonalFinance.Entity.Role;
 import com.vennhuu.PersonalFinance.Entity.User;
@@ -30,6 +31,7 @@ import com.vennhuu.PersonalFinance.Exception.ExistsPhoneNumberException;
 import com.vennhuu.PersonalFinance.Exception.IdInvalidException;
 import com.vennhuu.PersonalFinance.Repository.RoleRepository;
 import com.vennhuu.PersonalFinance.Repository.UserRepository;
+import com.vennhuu.PersonalFinance.Service.Producer.RabbitMQProducer;
 import com.vennhuu.PersonalFinance.Utils.SecurityUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +47,7 @@ public class AuthService {
     private final SecurityUtil securityUtil;
     private final RefreshTokenService refreshTokenService;
     private final EmailService emailService;
+    private final RabbitMQProducer rabbitMQProducer ;
 
     public AuthService(
             UserService userService,
@@ -54,7 +57,8 @@ public class AuthService {
             AuthenticationManager authenticationManager,
             SecurityUtil securityUtil,
             RefreshTokenService refreshTokenService,
-            EmailService emailService
+            EmailService emailService,
+            RabbitMQProducer rabbitMQProducer
         ) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
@@ -64,6 +68,7 @@ public class AuthService {
         this.securityUtil = securityUtil;
         this.refreshTokenService = refreshTokenService;
         this.emailService = emailService;
+        this.rabbitMQProducer = rabbitMQProducer ;
     }
 
     // check exist email
@@ -210,7 +215,8 @@ public class AuthService {
         user.setOtpExpiredAt(Instant.now().plus(5, ChronoUnit.MINUTES));
         this.userRepository.save(user);
 
-        this.emailService.sendOtpEmail(user.getEmail(), user.getFullName(), otpCode);
+        OtpEmailMessage message = new OtpEmailMessage(user.getEmail(), user.getFullName(), otpCode);
+        this.rabbitMQProducer.sendOtpEmail(message);
     }
 
     // reset password using OTP
@@ -234,7 +240,7 @@ public class AuthService {
         this.userRepository.save(user);
     }
 
-    // change password when logged in
+    // change password when login
     public void changePassword(ReqChangePasswordDTO req) {
         String email = SecurityUtil.getCurrentUserLogin()
                 .orElseThrow(() -> new BadCredentialsException("Vui lòng đăng nhập để đổi mật khẩu"));

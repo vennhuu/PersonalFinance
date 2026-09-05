@@ -1,15 +1,28 @@
 package com.vennhuu.PersonalFinance.Service;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vennhuu.PersonalFinance.Entity.Category;
 import com.vennhuu.PersonalFinance.Entity.Request.Transaction.TransactionReq;
+import com.vennhuu.PersonalFinance.Entity.Response.File.ResUploadFileDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.ResultPaginationDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.Transaction.ResTransaction;
 import com.vennhuu.PersonalFinance.Entity.Transaction;
@@ -18,6 +31,7 @@ import com.vennhuu.PersonalFinance.Entity.Wallet;
 import com.vennhuu.PersonalFinance.Enum.TransactionType;
 import com.vennhuu.PersonalFinance.Exception.BadRequestException;
 import com.vennhuu.PersonalFinance.Exception.ResourceNotFoundException;
+import com.vennhuu.PersonalFinance.Exception.StorageException;
 import com.vennhuu.PersonalFinance.Repository.CategoryRepository;
 import com.vennhuu.PersonalFinance.Repository.TransactionRepository;
 import com.vennhuu.PersonalFinance.Repository.WalletRepository;
@@ -28,25 +42,35 @@ import jakarta.transaction.Transactional;
 @Service
 public class TransactionService {
 
+    @Value("${vennhuu.upload-file.base-uri}")
+    private String baseURI;
+    private static final String RECEIPT_FOLDER = "receipts";
+    private static final List<String> ALLOWED_EXTENSIONS = Arrays.asList("pdf", "jpg", "jpeg", "png");
+    private static final long MAX_RECEIPT_SIZE = 5 * 1024 * 1024; // 5MB
+
     private final TransactionRepository transactionRepository;
     private final SecurityUtil securityUtil;
     private final UserService userService;
     private final WalletRepository walletRepository;
     private final CategoryRepository categoryRepository;
+    private final FileService fileService;
 
     public TransactionService(
             TransactionRepository transactionRepository,
             SecurityUtil securityUtil,
             UserService userService,
             WalletRepository walletRepository,
-            CategoryRepository categoryRepository
+            CategoryRepository categoryRepository,
+            FileService fileService
     ) {
         this.transactionRepository = transactionRepository;
         this.securityUtil = securityUtil;
         this.userService = userService;
         this.walletRepository = walletRepository;
         this.categoryRepository = categoryRepository;
+        this.fileService = fileService ;
     }
+    
 
     private User getCurrentUser() {
         String email = securityUtil.getCurrentUserLogin()
@@ -192,5 +216,85 @@ public class TransactionService {
 
         rollbackOldBalance(tx);
         transactionRepository.delete(tx);
+    }
+
+    // Upload / Xem / Xoá hoá đơn
+    public ResUploadFileDTO uploadReceipt(Long transactionId, MultipartFile file)
+            throws URISyntaxException, IOException, StorageException {
+        User user = getCurrentUser();
+        Transaction tx = getOwnedTransaction(transactionId, user.getId());
+
+        validateReceiptFile(file);
+        deleteOldReceiptIfExists(tx);
+
+        fileService.createDirectory(baseURI + RECEIPT_FOLDER);
+        String fileName = fileService.store(file, RECEIPT_FOLDER);
+
+        tx.setReceiptUrl(fileName);
+        transactionRepository.save(tx);
+
+        return new ResUploadFileDTO(fileName, Instant.now());
+    }
+
+    public ResponseEntity<Resource> getReceipt(Long transactionId)
+        throws URISyntaxException, FileNotFoundException, StorageException {
+        User user = getCurrentUser();
+        Transaction tx = getOwnedTransaction(transactionId, user.getId());
+
+        if (tx.getReceiptUrl() == null) {
+            throw new StorageException("Giao dịch này chưa có hoá đơn đính kèm.");
+        }
+
+        String fileName = tx.getReceiptUrl();
+        long fileLength = fileService.getFileLength(fileName, RECEIPT_FOLDER);
+        if (fileLength == 0) {
+            throw new StorageException("File with name = " + fileName + " not found.");
+        }
+
+        InputStreamResource resource = fileService.getResource(fileName, RECEIPT_FOLDER);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentLength(fileLength)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
+
+    public void deleteReceipt(Long transactionId) throws URISyntaxException {
+        User user = getCurrentUser();
+        Transaction tx = getOwnedTransaction(transactionId, user.getId());
+
+        if (tx.getReceiptUrl() == null) {
+            throw new ResourceNotFoundException("Giao dịch này chưa có hoá đơn đính kèm");
+        }
+
+        fileService.delete(tx.getReceiptUrl(), RECEIPT_FOLDER);
+        tx.setReceiptUrl(null);
+        transactionRepository.save(tx);
+    }
+
+    // thay thế old receipt
+    private void deleteOldReceiptIfExists(Transaction tx) throws URISyntaxException {
+        if (tx.getReceiptUrl() != null) {
+            fileService.delete(tx.getReceiptUrl(), RECEIPT_FOLDER);
+        }
+    }
+
+    // ktr file có valid k
+    private void validateReceiptFile(MultipartFile file) throws StorageException {
+        if (file == null || file.isEmpty()) {
+            throw new StorageException("File không được để trống");
+        }
+        if (file.getSize() > MAX_RECEIPT_SIZE) {
+            throw new StorageException("File không được vượt quá 5MB");
+        }
+
+        String fileName = file.getOriginalFilename();
+        boolean isValid = fileName != null &&
+                ALLOWED_EXTENSIONS.stream().anyMatch(ext -> fileName.toLowerCase().endsWith("." + ext));
+
+        if (!isValid) {
+            throw new StorageException("Chỉ chấp nhận file: " + ALLOWED_EXTENSIONS);
+        }
     }
 }

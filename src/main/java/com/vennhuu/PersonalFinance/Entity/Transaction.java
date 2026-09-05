@@ -57,4 +57,7 @@ public class Transaction extends BaseEntity {
 
     @Column(length = 500)
     private String note;
+
+    @Column(name = "receipt_url", length = 500)
+    private String receiptUrl;
 }

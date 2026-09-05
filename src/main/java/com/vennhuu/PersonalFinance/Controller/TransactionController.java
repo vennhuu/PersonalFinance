@@ -3,6 +3,7 @@ package com.vennhuu.PersonalFinance.Controller;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Pageable;
@@ -102,4 +103,11 @@ public class TransactionController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/export")
+    @APIMessage("Export transactions to CSV")
+    public ResponseEntity<Resource> exportCsv(
+            @RequestParam LocalDate fromDate,
+            @RequestParam LocalDate toDate) {
+        return transactionService.exportTransactionsToCsv(fromDate, toDate);
+    }
 }

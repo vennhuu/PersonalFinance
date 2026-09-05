@@ -4,11 +4,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -296,5 +299,50 @@ public class TransactionService {
         if (!isValid) {
             throw new StorageException("Chỉ chấp nhận file: " + ALLOWED_EXTENSIONS);
         }
+    }
+
+    // tạo csv
+    public ResponseEntity<Resource> exportTransactionsToCsv(LocalDate fromDate, LocalDate toDate) {
+        User user = getCurrentUser();
+
+        List<Transaction> transactions = transactionRepository
+                .findByUser_IdAndTransactionDateBetween(user.getId(), fromDate, toDate);
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("Ngày,Loại,Danh mục,Ví,Số tiền,Ghi chú\n");
+
+        for (Transaction tx : transactions) {
+            csv.append(tx.getTransactionDate()).append(",")
+            .append(tx.getType()).append(",")
+            .append(escapeCsv(tx.getCategory().getName())).append(",")
+            .append(escapeCsv(tx.getWallet().getName())).append(",")
+            .append(tx.getAmount()).append(",")
+            .append(escapeCsv(tx.getNote() != null ? tx.getNote() : ""))
+            .append("\n");
+        }
+
+        // Thêm BOM (Byte Order Mark) để Excel hiển thị đúng tiếng Việt có dấu
+        byte[] bom = new byte[] { (byte) 0xEF, (byte) 0xBB, (byte) 0xBF };
+        byte[] csvBytes = csv.toString().getBytes(StandardCharsets.UTF_8);
+        byte[] finalBytes = new byte[bom.length + csvBytes.length];
+        System.arraycopy(bom, 0, finalBytes, 0, bom.length);
+        System.arraycopy(csvBytes, 0, finalBytes, bom.length, csvBytes.length);
+
+        ByteArrayResource resource = new ByteArrayResource(finalBytes);
+        String fileName = "transactions_" + fromDate + "_" + toDate + ".csv";
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                .contentLength(finalBytes.length)
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .body(resource);
+    }
+
+    // Xử lý field có chứa dấu phẩy/xuống dòng, tránh phá cấu trúc CSV
+    private String escapeCsv(String value) {
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
     }
 }

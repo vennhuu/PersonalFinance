@@ -87,6 +87,8 @@ services:
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+
+      UPLOAD_BASE_URI: ${UPLOAD_BASE_URI}
     volumes:
       - ./uploads:/app/uploads
     depends_on:

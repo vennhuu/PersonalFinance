@@ -194,7 +194,9 @@ Dùng Spring Cache (`@Cacheable`, `@CacheEvict`) cho các dữ liệu hay lặp 
 
 ---
 
-## 9. Database Migration — Flyway
+## 9. Database Migration & Initialization
+
+### Migration — Flyway
 
 Scripts đặt tại `src/main/resources/db/migration/`:
 
@@ -206,6 +208,17 @@ V4__create_transactions.sql
 V5__create_budgets_goals.sql
 ...
 ```
+
+### Khởi tạo dữ liệu mặc định (DatabaseInit)
+
+Lớp `DatabaseInit` lắng nghe sự kiện `ApplicationReadyEvent` khi server khởi động:
+
+- **Roles**: Nếu bảng `roles` trống, tự động tạo 2 vai trò `ROLE_ADMIN` và `ROLE_USER`.
+- **Admin account**: Nếu bảng `users` trống, tự động tạo tài khoản quản trị viên:
+  - Email: lấy từ `EMAIL_USERNAME` (`spring.mail.username`)
+  - Password: mã hóa BCrypt từ `DEFAULT_ADMIN_PASSWORD` (`app.default-admin.password`, mặc định `admin123`)
+  - Role: `ROLE_ADMIN`
+- Tự động bỏ qua nếu cơ sở dữ liệu đã có người dùng.
 
 ---
 

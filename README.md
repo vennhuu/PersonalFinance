@@ -90,33 +90,46 @@ docker-compose up -d postgres redis rabbitmq
 
 ---
 
+## Tài khoản mặc định
+
+Khi ứng dụng khởi động lần đầu với cơ sở dữ liệu trống, `DatabaseInit` sẽ tự động tạo các vai trò (`ROLE_ADMIN`, `ROLE_USER`) và một tài khoản Admin để quản trị:
+
+- **Email**: Giá trị từ biến `EMAIL_USERNAME` trong `.env`
+- **Mật khẩu**: Giá trị từ biến `DEFAULT_ADMIN_PASSWORD` (mặc định: `admin123`)
+- **Họ tên**: `Phan Hữu Phước`
+- **Quyền**: `ROLE_ADMIN`
+
+---
+
 ## Biến môi trường
 
-| Biến                   | Mô tả                         | Ví dụ                                                  |
-| ---------------------- | ----------------------------- | ------------------------------------------------------ |
-| `POSTGRES_DB`          | Tên database                  | `personal_finance_db`                                  |
-| `DB_USERNAME`          | Username PostgreSQL           | `postgres`                                             |
-| `DB_PASSWORD`          | Password PostgreSQL           | `secret`                                               |
-| `DB_URL`               | JDBC URL                      | `jdbc:postgresql://localhost:5432/personal_finance_db` |
-| `POSTGRES_PORT`        | Port PostgreSQL               | `5432`                                                 |
-| `JPA_DDL_AUTO`         | DDL strategy                  | `validate`                                             |
-| `SHOW_SQL`             | In SQL ra console             | `false`                                                |
-| `JWT_SECRET`           | Secret key (Base64, 512-bit)  | `your_base64_key`                                      |
-| `JWT_ACCESS_EXPIRE`    | Thời hạn access token (giây)  | `3600`                                                 |
-| `JWT_REFRESH_EXPIRE`   | Thời hạn refresh token (giây) | `1209600`                                              |
-| `EMAIL_HOST`           | SMTP host                     | `smtp.gmail.com`                                       |
-| `EMAIL_PORT`           | SMTP port                     | `587`                                                  |
-| `EMAIL_USERNAME`       | Email gửi đi                  | `your@gmail.com`                                       |
-| `EMAIL_PASSWORD`       | App password Gmail            | `xxxx xxxx xxxx xxxx`                                  |
-| `REDIS_HOST`           | Redis host (local)            | `localhost`                                            |
-| `REDIS_PORT`           | Redis port                    | `6379`                                                 |
-| `DOCKER_REDIS_HOST`    | Redis host (Docker)           | `redis`                                                |
-| `RABBITMQ_HOST`        | RabbitMQ host (local)         | `localhost`                                            |
-| `RABBITMQ_PORT`        | RabbitMQ port                 | `5672`                                                 |
-| `RABBITMQ_USER`        | RabbitMQ username             | `guest`                                                |
-| `RABBITMQ_PASSWORD`    | RabbitMQ password             | `guest`                                                |
-| `DOCKER_RABBITMQ_HOST` | RabbitMQ host (Docker)        | `rabbitmq`                                             |
-| `UPLOAD_BASE_URI`      | Base URL cho file upload      | `http://localhost:8080`                                |
+| Biến                     | Mô tả                              | Ví dụ                                                  |
+| ------------------------ | ---------------------------------- | ------------------------------------------------------ |
+| `POSTGRES_DB`            | Tên database                       | `personal_finance_db`                                  |
+| `DB_USERNAME`            | Username PostgreSQL                | `postgres`                                             |
+| `DB_PASSWORD`            | Password PostgreSQL                | `secret`                                               |
+| `DB_URL`                 | JDBC URL                           | `jdbc:postgresql://localhost:5432/personal_finance_db` |
+| `POSTGRES_PORT`          | Port PostgreSQL                   | `5432`                                                 |
+| `JPA_DDL_AUTO`           | DDL strategy                       | `validate`                                             |
+| `SHOW_SQL`               | In SQL ra console                  | `false`                                                |
+| `JWT_SECRET`             | Secret key (Base64, 512-bit)       | `your_base64_key`                                      |
+| `JWT_ACCESS_EXPIRE`      | Thời hạn access token (giây)       | `3600`                                                 |
+| `JWT_REFRESH_EXPIRE`     | Thời hạn refresh token (giây)      | `1209600`                                              |
+| `EMAIL_HOST`             | SMTP host                          | `smtp.gmail.com`                                       |
+| `EMAIL_PORT`             | SMTP port                          | `587`                                                  |
+| `EMAIL_USERNAME`         | Email gửi đi (cũng là email Admin) | `your@gmail.com`                                       |
+| `EMAIL_PASSWORD`         | App password Gmail                 | `xxxx xxxx xxxx xxxx`                                  |
+| `DEFAULT_ADMIN_PASSWORD` | Mật khẩu tài khoản Admin mặc định  | `admin123`                                             |
+| `REDIS_HOST`             | Redis host (local)                 | `localhost`                                            |
+| `REDIS_PORT`             | Redis port                         | `6379`                                                 |
+| `DOCKER_REDIS_HOST`      | Redis host (Docker)                | `redis`                                                |
+| `RABBITMQ_HOST`          | RabbitMQ host (local)              | `localhost`                                            |
+| `RABBITMQ_PORT`          | RabbitMQ port                      | `5672`                                                 |
+| `RABBITMQ_USER`          | RabbitMQ username                  | `guest`                                                |
+| `RABBITMQ_PASSWORD`      | RabbitMQ password                  | `guest`                                                |
+| `DOCKER_RABBITMQ_HOST`   | RabbitMQ host (Docker)             | `rabbitmq`                                             |
+| `UPLOAD_BASE_URI`        | Base URL cho file upload           | `http://localhost:8080`                                |
+
 
 ---
 

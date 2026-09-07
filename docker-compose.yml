@@ -89,6 +89,7 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
 
       UPLOAD_BASE_URI: ${UPLOAD_BASE_URI}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:-admin123}
     volumes:
       - ./uploads:/app/uploads
     depends_on:

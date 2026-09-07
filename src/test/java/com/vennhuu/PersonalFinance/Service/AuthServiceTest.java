@@ -1,22 +1,28 @@
 package com.vennhuu.PersonalFinance.Service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,15 +33,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import com.vennhuu.PersonalFinance.Entity.RefreshToken;
-import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqLoginDTO;
-
 import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqChangePasswordDTO;
 import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqForgotPasswordDTO;
+import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqLoginDTO;
 import com.vennhuu.PersonalFinance.Entity.Request.Auth.ReqResetPasswordDTO;
 import com.vennhuu.PersonalFinance.Entity.Response.User.UserResponse;
 import com.vennhuu.PersonalFinance.Entity.Role;
 import com.vennhuu.PersonalFinance.Entity.User;
-import com.vennhuu.PersonalFinance.Entity.Wallet;
 import com.vennhuu.PersonalFinance.Enum.RoleName;
 import com.vennhuu.PersonalFinance.Enum.UserStatus;
 import com.vennhuu.PersonalFinance.Exception.ExistsEmailException;
@@ -160,7 +164,7 @@ class AuthServiceTest {
             UserResponse expectedResponse = new UserResponse();
             expectedResponse.setId(1L);
             expectedResponse.setEmail("a@example.com");
-            when(userService.convertToUserResponse(any(User.class), any(Wallet.class)))
+            when(userService.convertToUserResponse(any(User.class)))
                     .thenReturn(expectedResponse);
 
             UserResponse result = authService.registerNewUser(sampleUser);

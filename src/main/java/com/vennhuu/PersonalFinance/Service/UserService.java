@@ -2,25 +2,59 @@ package com.vennhuu.PersonalFinance.Service;
 
 import java.util.List;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vennhuu.PersonalFinance.Entity.Request.User.UpdateUserReq;
 import com.vennhuu.PersonalFinance.Entity.Response.User.UserResponse;
 import com.vennhuu.PersonalFinance.Entity.User;
-import com.vennhuu.PersonalFinance.Entity.Wallet;
 import com.vennhuu.PersonalFinance.Exception.ExistsEmailException;
 import com.vennhuu.PersonalFinance.Exception.ExistsPhoneNumberException;
+import com.vennhuu.PersonalFinance.Exception.ForbiddenException;
 import com.vennhuu.PersonalFinance.Exception.IdInvalidException;
 import com.vennhuu.PersonalFinance.Repository.UserRepository;
+import com.vennhuu.PersonalFinance.Utils.SecurityUtil;
 
 @Service
 public class UserService {
     
     private final UserRepository userRepository ;
+    private final SecurityUtil securityUtil ;
 
-    public UserService(UserRepository userRepository) {
+
+    public UserService(UserRepository userRepository, SecurityUtil securityUtil) {
         this.userRepository = userRepository;
+        this.securityUtil = securityUtil ;
+    }
+
+    private User getCurrentUser() {
+        String email = securityUtil.getCurrentUserLogin()
+                .orElseThrow(() -> new BadCredentialsException("Vui lòng đăng nhập"));
+        return userRepository.findByEmail(email);
+    }
+
+    private void validateOwnershipOrAdmin(Long targetUserId) {
+        User currentUser = getCurrentUser();
+
+        boolean isAdmin = currentUser.getRole() != null
+                && "ROLE_ADMIN".equals(currentUser.getRole().getName().toString());
+        boolean isOwner = currentUser.getId().equals(targetUserId);
+
+        if (!isAdmin && !isOwner) {
+            throw new ForbiddenException("Bạn không có quyền truy cập thông tin người dùng khác");
+        }
+    }
+
+    public UserResponse findByIdWithOwnershipCheck(Long id) {
+        validateOwnershipOrAdmin(id);
+        return findById(id);
+    }
+
+    @Transactional
+    public UserResponse updateUserWithOwnershipCheck(Long id, UpdateUserReq updateUserReq) {
+        validateOwnershipOrAdmin(id);
+        return updateUser(id, updateUserReq);
     }
 
     public User save(User user) {
@@ -42,20 +76,6 @@ public class UserService {
             userResponse.setRole(user.getRole().getName());
         }
 
-        return userResponse;
-    }
-
-    public UserResponse convertToUserResponse(User user, Wallet wallet) {
-        UserResponse userResponse = convertToUserResponse(user);
-        if (userResponse != null && wallet != null) {
-            UserResponse.WalletUser walletUser = new UserResponse.WalletUser(
-                wallet.getId(),
-                wallet.getName(),
-                wallet.getType(),
-                wallet.getMoney()
-            );
-            userResponse.setWallet(walletUser);
-        }
         return userResponse;
     }
 

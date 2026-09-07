@@ -1,20 +1,23 @@
 package com.vennhuu.PersonalFinance.Service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.vennhuu.PersonalFinance.Entity.Request.User.UpdateUserReq;
@@ -107,23 +110,18 @@ class UserServiceTest {
             wallet.setType(WalletType.CASH);
             wallet.setMoney(BigDecimal.valueOf(500_000));
 
-            UserResponse result = userService.convertToUserResponse(sampleUser, wallet);
+            UserResponse result = userService.convertToUserResponse(sampleUser);
 
             assertThat(result).isNotNull();
-            assertThat(result.getWallet()).isNotNull();
-            assertThat(result.getWallet().getId()).isEqualTo(10L);
-            assertThat(result.getWallet().getName()).isEqualTo("Tien mat");
-            assertThat(result.getWallet().getType()).isEqualTo(WalletType.CASH);
-            assertThat(result.getWallet().getMoney()).isEqualByComparingTo(BigDecimal.valueOf(500_000));
+
         }
 
         @Test
         @DisplayName("No wallet set when wallet is null")
         void shouldNotSetWalletWhenNull() {
-            UserResponse result = userService.convertToUserResponse(sampleUser, null);
+            UserResponse result = userService.convertToUserResponse(sampleUser);
 
             assertThat(result).isNotNull();
-            assertThat(result.getWallet()).isNull();
         }
     }
 

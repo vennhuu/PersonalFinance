@@ -23,7 +23,6 @@ import com.vennhuu.PersonalFinance.Entity.Response.RabbitMQ.OtpEmailMessage;
 import com.vennhuu.PersonalFinance.Entity.Response.User.UserResponse;
 import com.vennhuu.PersonalFinance.Entity.Role;
 import com.vennhuu.PersonalFinance.Entity.User;
-import com.vennhuu.PersonalFinance.Entity.Wallet;
 import com.vennhuu.PersonalFinance.Enum.RoleName;
 import com.vennhuu.PersonalFinance.Enum.UserStatus;
 import com.vennhuu.PersonalFinance.Exception.ExistsEmailException;
@@ -100,8 +99,7 @@ public class AuthService {
         user.setRole(r);
         this.userService.save(user);
 
-        Wallet wallet = new Wallet();
-        return this.userService.convertToUserResponse(user, wallet);
+        return this.userService.convertToUserResponse(user);
     }
 
     // login logic

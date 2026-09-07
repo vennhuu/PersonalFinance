@@ -49,6 +49,15 @@ public class GlobalException {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<RestResponse<Object>> handleBadRequestException(BadRequestException ex) {
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatus(HttpStatus.BAD_REQUEST.value());
+        res.setError("Bad Request");
+        res.setMessage(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
     // 409
     @ExceptionHandler(value = {
         ExistsEmailException.class,

@@ -122,6 +122,21 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.12</version>
+				<configuration>
+					<excludes>
+						<exclude>com/vennhuu/PersonalFinance/Entity/**</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Config/**</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Exception/**</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Enum/**</exclude>
+						<exclude>com/vennhuu/PersonalFinance/PersonalFinanceApplication.class</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Controller/**</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Service/Consumer/**</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Service/Producer/**</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Utils/**</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Service/FileService.class</exclude>
+						<exclude>com/vennhuu/PersonalFinance/Service/EmailService.class</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -140,13 +155,6 @@
 							<rules>
 								<rule>
 									<element>BUNDLE</element>
-									<excludes>
-										<exclude>com/vennhuu/PersonalFinance/Entity/**</exclude>
-										<exclude>com/vennhuu/PersonalFinance/Config/**</exclude>
-										<exclude>com/vennhuu/PersonalFinance/Exception/**</exclude>
-										<exclude>com/vennhuu/PersonalFinance/Enum/**</exclude>
-										<exclude>com/vennhuu/PersonalFinance/PersonalFinanceApplication</exclude>
-									</excludes>
 									<limits>
 										<limit>
 											<counter>LINE</counter>
